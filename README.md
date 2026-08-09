@@ -1,2 +1,23 @@
 # Kindle-clippings-viewer
-https://howhigh1337.github.io/Kindle-clippings-viewer/
+
+### Description
+AI-generated tool for convenient work with Kindle clippings. Live URL: https://howhigh1337.github.io/Kindle-clippings-viewer/
+
+### Features
+Here is what it does compared to the [default Amazon’s web page to check highlights](https://read.amazon.com/notebook) or working with the *My Clippings.txt*  file directly:
+
+* Search across book titles or clippings content
+* Books sorting: by newest/oldest highlight, A-Z, most clippings per book
+* Clippings sorting in a specific book: newest/oldest first, book location
+* Long highlights are not truncated
+* Support for 3rd-party documents, not just official Kindle books
+* Local first - your data never leaves your computer
+* Ultra fast search and navigation
+* tested on a file with 3700 highlights
+* Copy a clipping with 1 click
+
+### How to find *My Clippings.txt*
+
+1. Connect your Kindle via cable to your computer.
+2. Navigate to **documents** folder
+3. Find **My Clippings.txt** file
