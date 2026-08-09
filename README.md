@@ -1,5 +1,8 @@
 # Kindle-clippings-viewer
 
+<img width="1892" height="879" alt="image" src="https://github.com/user-attachments/assets/cac38428-7ccb-4173-97e3-0485a3f92860" />
+
+
 ### Description
 AI-generated tool for convenient work with Kindle clippings. Live URL: https://howhigh1337.github.io/Kindle-clippings-viewer/
 
