@@ -135,6 +135,10 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html, body{
+    scrollbar-color: var(--brass-soft) var(--panel);
+    scrollbar-width: auto;
+  }
   body{
     background:
       radial-gradient(ellipse at 15% 0%, #333c4c 0%, transparent 55%),
@@ -144,6 +148,22 @@
     font-family:'Inter',sans-serif;
     min-height:100vh;
     letter-spacing:0.01em;
+  }
+  html::-webkit-scrollbar{
+    width:11px;
+    height:11px;
+  }
+  html::-webkit-scrollbar-track{
+    background:rgba(255,255,255,0.05);
+  }
+  html::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,0.1);
+    border-radius:999px;
+    border:3px solid transparent;
+    background-clip:padding-box;
+  }
+  html::-webkit-scrollbar-thumb:hover{
+    background:rgba(255,255,255,0.16);
   }
   .app{
     display:flex;
