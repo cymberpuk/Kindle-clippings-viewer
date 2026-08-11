@@ -682,7 +682,6 @@
   <div class="sidebar">
     <div class="brand">
       <h1>Clippings</h1>
-      <span id="fileStatus">no file loaded</span>
     </div>
 
     <div class="search-box">
@@ -736,7 +735,7 @@ let activeBook = null;      // canonical book key or null = all
 let activeTypes = new Set(['Highlight','Note']);
 let searchTerm = '';
 let sortMode = 'date-desc';
-let bookSortMode = 'count'; // 'count' | 'newest' | 'oldest' | 'az'
+let bookSortMode = 'newest'; // 'count' | 'newest' | 'oldest' | 'az'
 let dupSuggestions = [];
 const RENDER_PAGE_SIZE = 150; // cap how many cards get built into the DOM at once
 let renderLimit = RENDER_PAGE_SIZE;
@@ -1084,16 +1083,16 @@ function getFiltered(){
 }
 
 function renderStats(){
-  const total = allEntries.length;
-  const h = allEntries.filter(e=>e.type==='Highlight').length;
-  const n = allEntries.filter(e=>e.type==='Note').length;
+  const filtered = getFiltered();
+  const h = filtered.filter(e=>e.type==='Highlight').length;
+  const n = filtered.filter(e=>e.type==='Note').length;
   const books = Object.keys(booksIndex).length;
   const scope = activeBook ? booksIndex[activeBook]?.title : 'All Books';
   return `
     <div class="stats-bar">
       <div>
         <h2>${escapeHtml(scope || 'All Books')}</h2>
-        <div class="sub">${total} clippings across ${books} book${books===1?'':'s'}</div>
+        <div class="sub">${filtered.length} clippings</div>
       </div>
       <div class="stamp-row">
         <div class="stamp"><span class="n">${h}</span><span class="l">Highlights</span></div>
@@ -1122,12 +1121,15 @@ function renderMain(keepRenderLimit){
         <option value="loc-asc">Location, ascending</option>
         <option value="book">Book, then location</option>
       </select>
-      <div class="right">
-        <button class="icon-btn" id="copyAllBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
-          Copy ${filtered.length} as text
-        </button>
-      </div>
+      ${activeBook
+      ? `<div class="right">
+          <button class="icon-btn" id="copyAllBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
+            Copy ${filtered.length} as text
+          </button>
+        </div>`
+      : ''}
+      
     </div>
   `;
   if(filtered.length === 0){
@@ -1144,17 +1146,11 @@ function renderMain(keepRenderLimit){
       const showBook = !activeBook;
       html += `
         <div class="clip-card">
-          <div class="clip-top">
-            <div>
-              ${showBook ? `<div class="clip-book">${escapeHtml(e.book)}</div>` : ''}
-              ${showBook && e.author ? `<div class="clip-author">${escapeHtml(e.author)}</div>` : ''}
-            </div>
-            <div class="type-tab ${e.type}">${e.type}</div>
-          </div>
           ${e.text ? `<div class="clip-text">${highlightMatch(e.text)}</div>`
                     : `<div class="clip-text empty">No text — ${e.type.toLowerCase()} marker only.</div>`}
           <div class="clip-bottom">
-            <div class="clip-loc">${fmtLoc(e)}${fmtLoc(e) && fmtDate(e) ? '  ·  ' : ''}${fmtDate(e)}</div>
+            <div class="type-tab ${e.type}">${e.type}</div>
+            ${showBook ? `<div class="clip-book">${escapeHtml(e.book)}</div>` : ''}
             <button class="clip-copy" data-copy="${encodeURIComponent(e.text || e.book)}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
               Copy
@@ -1169,7 +1165,11 @@ function renderMain(keepRenderLimit){
 
   el('sortSelect').value = sortMode;
   el('sortSelect').onchange = (ev)=>{ sortMode = ev.target.value; renderMain(); };
-  el('copyAllBtn').onclick = ()=> copyFilteredAsText(filtered);
+
+  if (activeBook) {
+    el('copyAllBtn').onclick = ()=> copyFilteredAsText(filtered);
+  }
+  
   const moreBtn = document.getElementById('showMoreBtn');
   if(moreBtn){
     moreBtn.onclick = ()=>{
@@ -1273,14 +1273,11 @@ async function copyText(text){
   catch(e){ showToast('Could not copy — try selecting manually'); }
 }
 function copyFilteredAsText(list){
-  const parts = list.map(e=>{
-    const head = `${e.book}${e.author ? ' — '+e.author:''}`;
-    const loc = fmtLoc(e);
-    const date = fmtDate(e);
-    const body = e.text || `[${e.type} — no text]`;
-    return `${head}\n${e.type} · ${loc}${loc&&date?' · ':''}${date}\n${body}`;
-  });
-  copyText(parts.join('\n\n---\n\n'));
+  const { author, book } = list?.[0] ?? {};
+  const title = `${book} — ${author}\n\n`;
+  const parts = list.map(e=>e.text || `[${e.type} — no text]`).join('\n\n---\n\n');
+
+  copyText(`${title}${parts}`);
 }
 
 /* ============ FILE HANDLING ============ */
@@ -1304,7 +1301,6 @@ async function ingest(raw){
   activeBook = null;
   searchTerm = '';
   el('searchInput').value = '';
-  el('fileStatus').textContent = allEntries.length + ' clippings loaded';
   renderTypeChips();
   renderBookList();
   renderDupAlert();
