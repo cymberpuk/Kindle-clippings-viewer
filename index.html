@@ -885,7 +885,15 @@ function parseClippings(raw){
       text: body
     });
   }
-  return entries;
+
+  const seen = new Set();
+
+  return entries.filter(entry => {
+    const key = (entry.text ?? '').trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });;
 }
 
 /* Similarity between two book title strings, for duplicate detection */
@@ -1092,14 +1100,6 @@ function getFiltered(){
   else if(sortMode==='date-asc') list.sort((a,b)=>(a.dateObj?.getTime()||0)-(b.dateObj?.getTime()||0));
   else if(sortMode==='loc-asc') list.sort((a,b)=>(a.locStart??1e9)-(b.locStart??1e9));
   else if(sortMode==='book') list.sort((a,b)=>a.book.localeCompare(b.book) || (a.locStart??0)-(b.locStart??0));
-
-  const seen = new Set();
-  list = list.filter(entry => {
-    const key = (entry.text ?? '').trim();
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
 
   return list;
 }
