@@ -1257,7 +1257,7 @@ function openMergeModal(){
       rebuildIndex();
       if(activeBook && !booksIndex[activeBook]) activeBook = null;
       renderBookList();
-      renderDupAlert();
+      // renderDupAlert();
       renderMain();
       overlay.remove();
       showToast(choice==='ignore' ? 'Marked as not duplicates' : 'Books merged');
@@ -1278,6 +1278,7 @@ async function copyText(text){
   catch(e){ showToast('Could not copy — try selecting manually'); }
 }
 function copyFilteredAsText(list){
+  console.log(merges);
   const groupedByBookAndAuthor = list.reduce((acc, entry) => {
     const key = `${entry.book} — ${entry.author}`;
     if (!acc[key]) acc[key] = [];
@@ -1316,7 +1317,7 @@ async function ingest(raw){
   el('searchInput').value = '';
   renderTypeChips();
   renderBookList();
-  renderDupAlert();
+  // renderDupAlert();
   renderMain();
 }
 
