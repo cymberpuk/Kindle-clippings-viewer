@@ -168,15 +168,14 @@
   .app{
     display:flex;
     min-height:100vh;
-    max-width:1400px;
     margin:0 auto;
   }
 
   /* ---------- Sidebar ---------- */
   .sidebar{
-    width:300px;
-    flex:0 0 300px;
-    padding:28px 18px 28px 24px;
+    width:350px;
+    flex:0 0 350px;
+    padding:28px;
     border-right:1px solid var(--border);
     display:flex;
     flex-direction:column;
@@ -382,7 +381,7 @@
   /* ---------- Main ---------- */
   .main{
     flex:1;
-    padding:28px 36px 40px 32px;
+    padding:28px;
     min-width:0;
   }
   .stats-bar{
@@ -570,7 +569,7 @@
     padding:70px 30px;
     text-align:center;
     color:var(--text-dim);
-    margin-top:6vh;
+    margin-top:61px;
     transition:border-color .15s, background .15s;
   }
   .dropzone.drag{border-color:var(--brass); background:var(--panel);}
@@ -688,7 +687,6 @@
       height:auto; position:static;
     }
     .book-list{max-height:220px;}
-    .main{padding:22px 18px 40px;}
   }
   :focus-visible{outline:2px solid var(--brass); outline-offset:1px;}
 </style>
@@ -1136,15 +1134,12 @@ function renderMain(keepRenderLimit){
         <option value="date-desc">Newest first</option>
         <option value="date-asc">Oldest first</option>
       </select>
-      ${activeBook
-      ? `<div class="right">
-          <button class="icon-btn" id="copyAllBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
-            Copy ${filtered.length} as text
-          </button>
-        </div>`
-      : ''}
-      
+      <div class="right">
+        <button class="icon-btn" id="copyAllBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
+          Copy all
+        </button>
+      </div>
     </div>
   `;
   if(filtered.length === 0){
@@ -1180,10 +1175,7 @@ function renderMain(keepRenderLimit){
 
   el('sortSelect').value = sortMode;
   el('sortSelect').onchange = (ev)=>{ sortMode = ev.target.value; renderMain(); };
-
-  if (activeBook) {
-    el('copyAllBtn').onclick = ()=> copyFilteredAsText(filtered);
-  }
+  el('copyAllBtn').onclick = ()=> copyFilteredAsText(filtered);
   
   const moreBtn = document.getElementById('showMoreBtn');
   if(moreBtn){
@@ -1288,11 +1280,19 @@ async function copyText(text){
   catch(e){ showToast('Could not copy — try selecting manually'); }
 }
 function copyFilteredAsText(list){
-  const { author, book } = list?.[0] ?? {};
-  const title = `${book} — ${author}\n\n`;
-  const parts = list.map(e=>e.text || `[${e.type} — no text]`).join('\n\n---\n\n');
+  const groupedByBookAndAuthor = list.reduce((acc, entry) => {
+    const key = `${entry.book} — ${entry.author}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(entry);
+    return acc;
+  }, {});
+  const text = Object.entries(groupedByBookAndAuthor).map(([bookAndAuthor, entries]) => {
+    const title = `${bookAndAuthor}\n\n\n`;
+    const parts = entries.map(e => e.text || `[${e.type} — no text]`).join('\n\n---\n\n');
+    return `${title}${parts}`;
+  }).join('\n\n========================================\n\n\n');
 
-  copyText(`${title}${parts}`);
+  copyText(text);
 }
 
 /* ============ FILE HANDLING ============ */
